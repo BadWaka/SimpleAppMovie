@@ -33,6 +33,9 @@ app.get('/', function (req, res) {
             movies.push(movie);
         });
         // console.log(movies);
-        res.json(movies);
+        let data = {
+            movies: movies
+        };
+        res.json(data);
     });
 });

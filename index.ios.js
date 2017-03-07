@@ -7,14 +7,6 @@ import {
     View
 } from 'react-native';
 
-let MOCKED_MOVIES_DATA = [
-    {
-        title: '标题',
-        year: '2015',
-        posters: {thumbnail: 'https://cdn.pixabay.com/photo/2017/01/07/20/38/portrait-1961529__340.jpg'}
-    },
-];
-
 let host = 'http://localhost:3000'
 
 // 样式
@@ -51,25 +43,53 @@ export default class SimpleAppMovie extends Component {
         this.state = {
             movies: null
         };
-        // // ES6中需要手动绑定this
-        // this.getMoviesFromApi = this.getMoviesFromApi.bind(this);
+        this.getMoviesFromApi = this.getMoviesFromApi.bind(this);
     }
 
+    // 真实DOM渲染之后被调用
     componentDidMount() {
         this.getMoviesFromApi();
     }
 
-    render() {
-        var movie = MOCKED_MOVIES_DATA[0];
+    /**
+     * 渲染加载中视图
+     * @return {XML}
+     */
+    renderLoadingView() {
         return (
             <View style={styles.container}>
-                <Image style={styles.thumbnail} source={{uri: movie.posters.thumbnail}}/>
+                <Text>正在加载电影数据</Text>
+            </View>
+        );
+    }
+
+    /**
+     * 渲染电影项
+     * @param movie
+     * @return {XML}
+     */
+    renderMovie(movie) {
+        return (
+            <View style={styles.container}>
+                <Image style={styles.thumbnail} source={{uri: movie.imgThumbnail}}/>
                 <View style={styles.rightContainer}>
-                    <Text style={styles.title}>{movie.title}</Text>
-                    <Text style={styles.year}>{movie.year}</Text>
+                    <Text style={styles.title}>{movie.name}</Text>
+                    <Text style={styles.year}>{movie.intro}</Text>
                 </View>
             </View>
         );
+    }
+
+    // 渲染
+    render() {
+        console.log('render this.state.movies = ' + JSON.stringify(this.state.movies));
+        if (!this.state.movies) {
+            return this.renderLoadingView();
+        }
+
+        let movie = this.state.movies[0];
+        console.log('movie = ' + JSON.stringify(movie));
+        return this.renderMovie(movie);
     }
 
     // 从Api获取电影数据
@@ -78,11 +98,25 @@ export default class SimpleAppMovie extends Component {
             let response = await fetch(host + '/');
             let responseJson = await response.json();
             console.log('responseJson = ' + JSON.stringify(responseJson));
+            this.setState({
+                movies: responseJson.movies
+            });
             return responseJson.movies;
         } catch (error) {
             console.error(error);
         }
     }
+
+    // getMoviesFromApi() {
+    //     fetch(host + '/')
+    //         .then((response) => response.json())
+    //         .then((responseData) => {
+    //             console.log(responseData);
+    //             this.setState({
+    //                 movies: responseData
+    //             });
+    //         });
+    // }
 }
 
 AppRegistry.registerComponent('SimpleAppMovie', () => SimpleAppMovie);
